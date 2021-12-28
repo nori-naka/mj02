@@ -12,12 +12,12 @@ import "leaflet/dist/leaflet.css"
 import L from "leaflet";
 import { wakeupLock } from "./wakeupLock";
 import { get_events } from "./jyohouban";
-// import { line_init } from "./LINE";
+import { line_init } from "./LINE";
 
 export default {
   data() {
     return {
-      disable_flag: true,
+      first_flag: true,
       map: null,
       coords: {
         lat: "",
@@ -50,18 +50,6 @@ export default {
       this.$refs.sound_el.src = url;
       this.$refs.sound_el.play();
     },
-    async get_flag() {
-      console.log("フラグ取りに行ったよ。")
-      const res = await fetch("/get_flag");
-      const {flag} = await res.json();
-      if (this.last_flag != flag) {
-        console.log("変わったよ！")
-        if (flag == "1") {
-          this.sound_on("/admin/speech.mp3");
-        }
-        this.last_flag = flag;
-      }
-    },
     // 住所（文字列）をMessageAPIで送信して、その後、喋る
     // async speech() {
     //   // const uttr = new SpeechSynthesisUtterance(this.talk);
@@ -89,7 +77,16 @@ export default {
         lng: Math.round(pos.coords.longitude * 1000000) / 1000000
       }
       const latlng = L.latLng(this.coords);
-      this.map.panTo(latlng, {animate: true});
+
+      // 初めてgeo_successが実行されるときのみ、実行される
+      if (this.first_flag) {
+        this.map.panTo(latlng, {animate: true});
+        line_init(p => {
+          this.profile = p;
+        });
+        console.log(this.profile);
+        this.first_flag = false;
+      }
       const popup_content = `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`
       if (this.self_marker) {
         this.map.removeLayer(this.self_marker);
