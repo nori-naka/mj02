@@ -39,7 +39,6 @@ const line_init = (next) => {
       profile.displayName = _profile.displayName;
       profile.pictureUrl = _profile.pictureUrl;
       profile.statusMessage = _profile.statusMessage;
-      console.log(this.profile);
 
       if (next) next(profile);
       return profile;
