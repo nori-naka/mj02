@@ -2,8 +2,6 @@
   <div class="map_layout">
     <div v-if="false" class="overlay"></div>
     <div id="map" />
-    <!-- <div id="button" @click="speech">PUSH</div> -->
-    <audio ref="sound_el"></audio>
   </div>
 </template>
 
@@ -13,41 +11,63 @@ import L from "leaflet";
 import { wakeupLock } from "./wakeupLock";
 import { get_events, get_address } from "./jyohouban";
 import { line_init } from "./LINE";
+import hw_json from "../assets/N06-20_HighwaySection.json";
 
 export default {
   data() {
     return {
       first_flag: true,
       map: null,
-      coords: { lat: "", lng: "" },
-      last_coords: { lat: "", lng: "" },
+      coords: { lat: "", lng: "", time_stamp: 0 },
+      last_coords: { lat: "", lng: "", time_stamp: 0 },
       profile: {},
-      self_marker: null
+      self_marker: null,
     }
   },
   async mounted() {
-
+    // 眠気覚まし
     wakeupLock();
-    // line_init();
-
+    // 自位置取得
     navigator.geolocation.watchPosition(this.geo_success, this.geo_error);
+
+    const hw_type = {
+      1:"高速自動車国道",
+      2:"高速自動車国道に並行する自動車専用道路",
+      3:"一般国道の自動車専用道路",
+      4:"本州四国連絡高速道路",
+      5:"指定都市高速道路",
+      6:"その他の道路"
+    }
+
     this.map = L.map("map", {
       center: L.latLng( 35.6825, 139.752778), 
       zoom: 12
     }).addLayer(
-      L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png')
+      L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        opacity: 0.5
+      })
     );
 
-    // 1秒おきに、サーバ側で、フラグが立ったか？を確認している。
-    // setInterval(async () => {
-    //   await this.get_flag();
-    // }, 1000);
+    const hw_layer = L.geoJSON(hw_json, {
+      style: () => {
+        // console.dir(feature);
+        return { 
+          color: "gray",
+          weight: 6
+        }
+      },
+      onEachFeature: (feature, layer) => {
+        console.log(feature);
+        console.log(layer);
+        layer.bindPopup(
+          `<h1>${feature.properties.N06_007}</h1>
+          <h3>${hw_type[feature.properties.N06_008]} / ${feature.properties.N06_010}車線</h3>`
+        );
+      }
+    });
+    this.map.addLayer(hw_layer);
   },
   methods: {
-    sound_on(url) {
-      this.$refs.sound_el.src = url;
-      this.$refs.sound_el.play();
-    },
     // 住所（文字列）をMessageAPIで送信して、その後、喋る
     // async speech() {
     //   // const uttr = new SpeechSynthesisUtterance(this.talk);
@@ -72,7 +92,8 @@ export default {
     async geo_success(pos) {
       this.coords = {
         lat: Math.round(pos.coords.latitude * 1000000) / 1000000,
-        lng: Math.round(pos.coords.longitude * 1000000) / 1000000
+        lng: Math.round(pos.coords.longitude * 1000000) / 1000000,
+        time_stamp: Date.now()
       }
       const latlng = L.latLng(this.coords);
       // const popup_content = `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`
@@ -86,6 +107,7 @@ export default {
           console.log(this.profile);
           if (this.self_marker && this.profile.pictureUrl) {
             this.self_marker.setIcon(L.icon({
+              className: "icon_style",
               iconUrl: this.profile.pictureUrl,
               iconSize: [40, 40],
               iconAnchor: [20, 20],
@@ -102,6 +124,7 @@ export default {
         // アイコンを使用する場合
         this.self_marker = L.marker(latlng, {
           icon: L.icon({
+            className: "icon_style",
             iconUrl: require("@/assets/people_marker.png"),
             iconSize: [40, 40],
             iconAnchor: [20, 20],
@@ -123,7 +146,9 @@ export default {
         }
       }
 
-      await get_events({lat: this.coords.lat, lon: this.coords.lng, range: 300}, this.map);
+      if (this.coords.time_stamp - this.last_coords.time_stamp > 10000) {
+        await get_events({lat: this.coords.lat, lon: this.coords.lng, range: 300}, this.map);
+      }
       this.last_coords = { ...this.coords };
     },
     geo_error(error) {
@@ -134,6 +159,11 @@ export default {
 </script>
 
 <style>
+.icon_style {
+  border-radius: 50%;
+  border-color: #549fa9;
+  border-width: 1px;
+}
 .map_layout {
   position: relative;
   height: 100vh;
