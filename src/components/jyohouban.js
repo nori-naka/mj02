@@ -26,18 +26,18 @@ const get_address = async ({ lat, lon }) => {
 
   if (res.ok) {
     const address_data = await res.json();
-    const banchi = address_data.results.lv01Nm;
-    const muniCd = address_data.results.muniCd;
-    const [, ken_name, , city_name] = GSI.MUNI_ARRAY[muniCd].split(",");
-
-    return {
-      ken: ken_name,
-      city: city_name,
-      banchi: banchi
+    if (address_data && address_data.results) {
+      const banchi = address_data.results.lv01Nm;
+      const muniCd = address_data.results.muniCd;
+      const [, ken_name, , city_name] = GSI.MUNI_ARRAY[muniCd].split(",");  
+      return {
+        ken: ken_name,
+        city: city_name,
+        banchi: banchi
+      }
     }
-  } else {
-    return null
   }
+  return null
 }
 
 const MAIN_URL = "https://mobileinfogroupappservice.azurewebsites.net"

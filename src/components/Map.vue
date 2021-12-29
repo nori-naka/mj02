@@ -78,6 +78,11 @@ export default {
       }
       const latlng = L.latLng(this.coords);
 
+      const cur_address = await get_address({ lat: this.coords.lat, lon: this.coords.lng });
+      const popup_content = cur_address ? `<h1>現在の場所は<br>${cur_address.ken} ${cur_address.city} ${cur_address.banchi}付近です</h1>` :
+                                          `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`;
+      // const popup_content = `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`
+
       // 初めてgeo_successが実行されるときのみ、実行される
       if (this.first_flag) {
         this.map.panTo(latlng, {animate: true});
@@ -85,29 +90,33 @@ export default {
           this.profile = p;
           console.log("----------PROFILE-----------")
           console.log(this.profile);
+          if (this.self_marker && this.profile.pictureUrl) {
+            this.self_marker.setIcon(L.icon({
+              iconUrl: this.profile.pictureUrl,
+              iconSize: [40, 40],
+              iconAnchor: [20, 20],
+              popupAnchor: [0, -20]
+            }));
+          }
         });
         this.first_flag = false;
       }
 
-      const cur_address = await get_address(this.coords);
-      const popup_content = `<h1>現在の場所は<br>${cur_address.ken} ${cur_address.city} ${cur_address.banchi}付近です</h1>`
-      // const popup_content = `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`
       if (this.self_marker) {
-        this.map.removeLayer(this.self_marker);
-      }
-
-      // アイコンを使用する場合
-      this.self_marker = L.marker(latlng, {
-        icon: L.icon({
-          iconUrl: this.profile.pictureUrl ? this.profile.pictureUrl : require("@/assets/people_marker.png"),
-          iconSize: [40, 40],
-          iconAnchor: [20, 20],
-          popupAnchor: [0, -20]
+        this.self_marker.setLatLng(latlng);
+      } else {
+        // アイコンを使用する場合
+        this.self_marker = L.marker(latlng, {
+          icon: L.icon({
+            iconUrl: require("@/assets/people_marker.png"),
+            iconSize: [40, 40],
+            iconAnchor: [20, 20],
+            popupAnchor: [0, -20]
+          })
         })
-      })
-        .addTo(this.map)
-        .bindPopup(popup_content);
-
+          .addTo(this.map)
+          .bindPopup(popup_content);
+      }
       await get_events({lat: this.coords.lat, lon: this.coords.lng, range: 300}, this.map);
     },
     geo_error(error) {
