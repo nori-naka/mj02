@@ -30,14 +30,14 @@ export default {
     // 自位置取得
     navigator.geolocation.watchPosition(this.geo_success, this.geo_error);
 
-    const hw_type = {
-      1:"高速自動車国道",
-      2:"高速自動車国道に並行する自動車専用道路",
-      3:"一般国道の自動車専用道路",
-      4:"本州四国連絡高速道路",
-      5:"指定都市高速道路",
-      6:"その他の道路"
-    }
+    // const hw_type = {
+    //   1:"高速自動車国道",
+    //   2:"高速自動車国道に並行する自動車専用道路",
+    //   3:"一般国道の自動車専用道路",
+    //   4:"本州四国連絡高速道路",
+    //   5:"指定都市高速道路",
+    //   6:"その他の道路"
+    // }
 
     this.map = L.map("map", {
       center: L.latLng( 35.6825, 139.752778), 
@@ -56,14 +56,14 @@ export default {
           weight: 6
         }
       },
-      onEachFeature: (feature, layer) => {
-        console.log(feature);
-        console.log(layer);
-        layer.bindPopup(
-          `<h1>${feature.properties.N06_007}</h1>
-          <h3>${hw_type[feature.properties.N06_008]} / ${feature.properties.N06_010}車線</h3>`
-        );
-      }
+      // onEachFeature: (feature, layer) => {
+      //   console.log(feature);
+      //   console.log(layer);
+      //   layer.bindPopup(
+      //     `<h1>${feature.properties.N06_007}</h1>
+      //     <h3>${hw_type[feature.properties.N06_008]} / ${feature.properties.N06_010}車線</h3>`
+      //   );
+      // }
     });
     this.map.addLayer(hw_layer);
   },
