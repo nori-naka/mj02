@@ -84,6 +84,7 @@ export default {
         line_init(p => {
           this.profile = p;
         });
+        console.log("----------PROFILE-----------")
         console.log(this.profile);
         this.first_flag = false;
       }

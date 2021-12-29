@@ -41,7 +41,7 @@ const line_init = (next) => {
       profile.statusMessage = _profile.statusMessage;
 
       if (next) next(profile);
-      return profile;
+      // return profile;
     })
     .catch(err => {
       console.log(err.message);
