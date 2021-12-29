@@ -83,9 +83,9 @@ export default {
         this.map.panTo(latlng, {animate: true});
         line_init(p => {
           this.profile = p;
+          console.log("----------PROFILE-----------")
+          console.log(this.profile);
         });
-        console.log("----------PROFILE-----------")
-        console.log(this.profile);
         this.first_flag = false;
       }
       const popup_content = `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`
