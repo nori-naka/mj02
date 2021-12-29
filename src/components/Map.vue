@@ -19,12 +19,10 @@ export default {
     return {
       first_flag: true,
       map: null,
-      coords: {
-        lat: "",
-        lng: ""
-      },
+      coords: { lat: "", lng: "" },
+      last_coords: { lat: "", lng: "" },
       profile: {},
-      self_marker: null,
+      self_marker: null
     }
   },
   async mounted() {
@@ -77,10 +75,6 @@ export default {
         lng: Math.round(pos.coords.longitude * 1000000) / 1000000
       }
       const latlng = L.latLng(this.coords);
-
-      const cur_address = await get_address({ lat: this.coords.lat, lon: this.coords.lng });
-      const popup_content = cur_address ? `<h1>現在の場所は<br>${cur_address.ken} ${cur_address.city} ${cur_address.banchi}付近です</h1>` :
-                                          `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`;
       // const popup_content = `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`
 
       // 初めてgeo_successが実行されるときのみ、実行される
@@ -115,9 +109,22 @@ export default {
           })
         })
           .addTo(this.map)
-          .bindPopup(popup_content);
+          // .bindPopup(popup_content);
       }
+      if (this.last_coords.lat != this.coords.lat && this.last_coords.lng != this.coords.lng) {
+        const cur_address = await get_address({ lat: this.coords.lat, lon: this.coords.lng });
+        const popup_content = cur_address ? `<h1>現在の場所は<br>${cur_address.ken} ${cur_address.city} ${cur_address.banchi}付近です</h1>` :
+                                            `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`;
+        const self_popup = this.self_marker.getPopup();
+        if (self_popup) {
+          self_popup.setContent(popup_content);
+        } else {
+          this.self_marker.bindPopup(popup_content);
+        }
+      }
+
       await get_events({lat: this.coords.lat, lon: this.coords.lng, range: 300}, this.map);
+      this.last_coords = { ...this.coords };
     },
     geo_error(error) {
       console.log(`GEO_ERROR: ${error.message}`);
