@@ -11,7 +11,7 @@
 import "leaflet/dist/leaflet.css"
 import L from "leaflet";
 import { wakeupLock } from "./wakeupLock";
-import { get_events } from "./jyohouban";
+import { get_events, get_address } from "./jyohouban";
 import { line_init } from "./LINE";
 
 export default {
@@ -88,7 +88,10 @@ export default {
         });
         this.first_flag = false;
       }
-      const popup_content = `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`
+
+      const cur_address = await get_address(this.coords);
+      const popup_content = `<h1>現在の場所は<br>${cur_address.ken} ${cur_address.city} ${cur_address.banchi}付近です</h1>`
+      // const popup_content = `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`
       if (this.self_marker) {
         this.map.removeLayer(this.self_marker);
       }
