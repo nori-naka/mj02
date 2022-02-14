@@ -83,7 +83,6 @@ export default {
           const area_in = pointInPolygon([this.coords.lat, this.coords.lng], areas[id].coords);
           if (area_in) {
             console.log("エリアの中にいます。");
-            console.log(this.last_msg_id);
             console.log(areas[id].content);
 
             if (this.last_content != areas[id].content) {
@@ -251,7 +250,7 @@ export default {
           icon: L.icon({
             className: "icon_style",
             iconUrl: this.profile.pictureUrl ? this.profile.pictureUrl : require("@/assets/people_marker.png"),
-            iconSize: [40, 40],
+            iconSize: [64, 64],
             iconAnchor: [20, 20],
             popupAnchor: [0, -20]
           })
@@ -277,7 +276,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .icon_style {
   border-radius: 50%;
   border-color: #549fa9;

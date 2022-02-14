@@ -44,11 +44,12 @@ const MAIN_URL = "https://mobileinfogroupappservice.azurewebsites.net";
 const API_EVENTS = "/api/FixedEvents";
 const API_AREA = "/api/AreaPoints";
 const areas = {};
+const mj = {};
+let last_mj_ids = [];
 
 const get_events = async ({lat, lon, range}, map) => {
 
   const url_event = MAIN_URL + API_EVENTS + `?lat=${lat}&lon=${lon}&range=${range}`;
-  const mj = {};
 
   const res_event = await fetch(url_event);
   if (res_event.ok) {
@@ -58,7 +59,6 @@ const get_events = async ({lat, lon, range}, map) => {
     // Object.keys(mj).forEach(id => {
     //   map.removeLayer(mj[id]);
     // })
-    let last_mj_ids = [];
 
     json_event.forEach( async ({ payload }) => {
       if (
