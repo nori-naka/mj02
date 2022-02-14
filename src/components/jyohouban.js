@@ -66,8 +66,13 @@ const get_events = async ({lat, lon, range}, map) => {
         payload.actions && payload.actions.length > 0 && payload.actions[0].action.voices
       ) {
 
+        const mj_keys = Object.keys(mj);
+        console.log(`nodeID: ${payload.nodeID} in ${mj_keys}`);
         // 既に登録済みの場合、抜ける
-        if (payload.nodeID in Object.keys(mj)) return;
+        if (payload.nodeID in Object.keys(mj)) {
+          console.log("既に登録済み。登録しないよ")
+          return;
+        }
 
         const content = `<H1>${payload.eventTitle}</H1>
         <audio controls src=${payload.actions[0].action.voices[0].url}> </audio>`

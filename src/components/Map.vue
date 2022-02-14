@@ -259,6 +259,7 @@ export default {
           // .bindPopup(popup_content);
       }
       // モバ情の場合
+      console.log(`NOW:${this.coords.time_stamp} LAST:${this.last_coords.time_stamp}`);
       if (this.coords.time_stamp - this.last_coords.time_stamp > 1000) {
         await get_events({lat: this.coords.lat, lon: this.coords.lng, range: 300}, this.map);
       }
