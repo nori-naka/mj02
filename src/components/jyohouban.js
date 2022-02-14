@@ -40,23 +40,25 @@ const get_address = async ({ lat, lon }) => {
   return null
 }
 
-const MAIN_URL = "https://mobileinfogroupappservice.azurewebsites.net"
-const API_EVENTS = "/api/FixedEvents"
-const API_AREA = "/api/AreaPoints"
+const MAIN_URL = "https://mobileinfogroupappservice.azurewebsites.net";
+const API_EVENTS = "/api/FixedEvents";
+const API_AREA = "/api/AreaPoints";
+const areas = {};
+
 const get_events = async ({lat, lon, range}, map) => {
 
   const url_event = MAIN_URL + API_EVENTS + `?lat=${lat}&lon=${lon}&range=${range}`;
   const mj = {};
-  // const area_ids = [];
 
   const res_event = await fetch(url_event);
   if (res_event.ok) {
     const json_event = await res_event.json();
 
-    // 一旦全部消す
-    Object.keys(mj).forEach(id => {
-      map.removeLayer(mj[id]);
-    })
+    // // 一旦全部消す
+    // Object.keys(mj).forEach(id => {
+    //   map.removeLayer(mj[id]);
+    // })
+    let last_mj_ids = [];
 
     json_event.forEach( async ({ payload }) => {
       if (
@@ -64,9 +66,13 @@ const get_events = async ({lat, lon, range}, map) => {
         payload.actions && payload.actions.length > 0 && payload.actions[0].action.voices
       ) {
 
+        // 既に登録済みの場合、抜ける
+        if (payload.nodeID in Object.keys(mj)) return;
+
         const content = `<H1>${payload.eventTitle}</H1>
         <audio controls src=${payload.actions[0].action.voices[0].url}> </audio>`
 
+        // エリアの場合
         if (payload.locationTypeID == 2) {
           // area_ids.push(payload.nodeID); 
           const url_area = MAIN_URL + API_AREA + `?id=${payload.nodeID}`;
@@ -80,8 +86,10 @@ const get_events = async ({lat, lon, range}, map) => {
             mj[payload.nodeID] = L.polygon(latlngs, {color: "red"})
               .addTo(map)
               .bindPopup(content);  
+            areas[payload.nodeID] = { coords: latlngs, content: `${payload.actions[0].action.voices[0].url}` };
           }
         } else {
+        // 地点通過の場合
           const latlng = L.latLng({lat: payload.node.p2.latitude, lng: payload.node.p2.longitude});
           mj[payload.nodeId] = L.marker(latlng, {
             icon: L.icon({
@@ -96,6 +104,14 @@ const get_events = async ({lat, lon, range}, map) => {
         }
       }
     });
+    // 前回登録したIDで今回登録が無い場合には地図からも削除
+    last_mj_ids.forEach(id => {
+      if (id in Object.keys(mj)) {
+        map.removeLayer(mj[id]);
+        delete areas[id];
+      }
+    })
+    last_mj_ids = Object.keys(mj);
   }
 
   // area_ids.forEach(async id => {
@@ -111,4 +127,4 @@ const get_events = async ({lat, lon, range}, map) => {
   // })
 }
 
-export { get_events, equalObj, get_address };
+export { get_events, equalObj, get_address, areas };
