@@ -50,6 +50,8 @@ let last_mj_ids = [];
 const get_events = async ({lat, lon, range}, map) => {
 
   const url_event = MAIN_URL + API_EVENTS + `?lat=${lat}&lon=${lon}&range=${range}`;
+  const mj_ids = Object.keys(mj);
+  const cur_mj_ids = [];
 
   const res_event = await fetch(url_event);
   if (res_event.ok) {
@@ -66,10 +68,10 @@ const get_events = async ({lat, lon, range}, map) => {
         payload.actions && payload.actions.length > 0 && payload.actions[0].action.voices
       ) {
 
-        const mj_keys = Object.keys(mj);
-        console.log(`nodeID: ${payload.nodeID} in ${mj_keys}`);
+        cur_mj_ids.push(payload.nodeID);
+        console.log(`nodeID: ${payload.nodeID} in ${mj_ids}`);
         // 既に登録済みの場合、抜ける
-        if (Object.keys(mj).includes(payload.nodeID)) {
+        if (mj_ids.includes(payload.nodeID)) {
           console.log("既に登録済み。登録しないよ")
           return;
         }
@@ -110,13 +112,13 @@ const get_events = async ({lat, lon, range}, map) => {
       }
     });
     // 前回登録したIDで今回登録が無い場合には地図からも削除
-    last_mj_ids.forEach(id => {
-      if (!Object.keys(mj).includes(id)) {
-        map.removeLayer(mj[id]);
+    last_mj_ids.forEach(last_id => {
+      if (!cur_mj_ids.includes(last_id)) {
+        map.removeLayer(mj[last_id]);
         delete areas[id];
       }
     })
-    last_mj_ids = Object.keys(mj);
+    last_mj_ids = [ ...cur_mj_ids ];
   }
 
   // area_ids.forEach(async id => {
