@@ -89,10 +89,13 @@ export default {
               this.audio_url = `${areas[id].content}`;
               await this.$refs.audio_el.play();
               areas[id].last_content = areas[id].content;
-              areas[id].played = true;
+              areas[id].played = Date.now();
             }
           } else {
             console.log("残念。外です。");
+            if (areas[id].played && Date.now() - areas[id].played > 30000) {
+              areas[id].played = false;
+            }
           }
         }
       });
