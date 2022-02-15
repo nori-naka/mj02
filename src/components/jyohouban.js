@@ -71,7 +71,7 @@ const get_events = async ({lat, lon, range}, map) => {
         cur_mj[payload.nodeID] = payload.uuid;
         console.log(`nodeID: ${payload.nodeID} in ${Object.keys(mj)}`);
         // 既に登録済みの場合、抜ける
-        if (Object.keys(mj).includes(payload.nodeID) && mj[payload.nodeID].uuid == payload.uuid) {
+        if (Object.keys(mj).includes(payload.nodeID)) {
           console.log("既に登録済み。登録しないよ")
           return;
         }
@@ -92,7 +92,8 @@ const get_events = async ({lat, lon, range}, map) => {
             console.log(latlngs);
             mj[payload.nodeID] = {
               layer: L.polygon(latlngs, {color: "red"}).addTo(map).bindPopup(content),
-              uuid: payload.uuid
+              uuid: payload.uuid,
+
             }
             areas[payload.nodeID] = { coords: latlngs, content: `${payload.actions[0].action.voices[0].url}` };
           }
