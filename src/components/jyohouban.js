@@ -45,7 +45,7 @@ const API_EVENTS = "/api/FixedEvents";
 const API_AREA = "/api/AreaPoints";
 const areas = {};
 const mj = {};
-let last_mj_ids = [];
+// let last_mj_ids = [];
 
 const get_events = async ({lat, lon, range}, map) => {
 
@@ -111,16 +111,25 @@ const get_events = async ({lat, lon, range}, map) => {
       }
     });
     // 前回登録したIDで今回登録が無い場合には地図からも削除
-    console.log(`last_mj_ids = ${last_mj_ids}`);
+    console.log(`mj_ids = ${mj_ids}`);
     console.log(`cur_mj_ids = ${cur_mj_ids}`);
-    last_mj_ids.forEach(last_id => {
-      if (!cur_mj_ids.includes(last_id)) {
-        map.removeLayer(mj[last_id]);
-		  delete mj[last_id];
-        delete areas[last_id];
-      }
-    })
-    last_mj_ids = [ ...cur_mj_ids ];
+
+	 mj_ids.forEach(id => {
+		if (!cur_mj_ids.includes(id)) {
+			map.removeLayer(mj[last_id]);
+			delete mj[last_id];
+			delete areas[last_id]; 
+		}
+	 });
+
+   //  last_mj_ids.forEach(last_id => {
+   //    if (!cur_mj_ids.includes(last_id)) {
+   //      map.removeLayer(mj[last_id]);
+	// 	  delete mj[last_id];
+   //      delete areas[last_id];
+   //    }
+   //  })
+   //  last_mj_ids = [ ...cur_mj_ids ];
   }
 
   // area_ids.forEach(async id => {
