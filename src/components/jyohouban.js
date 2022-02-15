@@ -116,9 +116,9 @@ const get_events = async ({lat, lon, range}, map) => {
 
 	 mj_ids.forEach(id => {
 		if (!cur_mj_ids.includes(id)) {
-			map.removeLayer(mj[last_id]);
-			delete mj[last_id];
-			delete areas[last_id]; 
+			map.removeLayer(mj[id]);
+			delete mj[id];
+			delete areas[id]; 
 		}
 	 });
 
