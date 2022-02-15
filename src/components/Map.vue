@@ -49,7 +49,7 @@ export default {
         this.self_marker.setIcon(L.icon({
           className: "icon_style",
           iconUrl: this.profile.pictureUrl,
-          iconSize: [40, 40],
+          iconSize: [64, 64],
           iconAnchor: [20, 20],
           popupAnchor: [0, -20]
         }))
@@ -85,7 +85,7 @@ export default {
             console.log("エリアの中にいます。");
             console.log(areas[id]);
 
-            if (areas[id].last_content != areas[id].content && areas[id].played) {
+            if (areas[id].last_content != areas[id].content && !areas[id].played) {
               this.audio_url = `${areas[id].content}`;
               await this.$refs.audio_el.play();
               areas[id].last_content = areas[id].content;
