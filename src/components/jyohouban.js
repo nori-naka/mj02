@@ -113,14 +113,13 @@ const get_events = async ({lat, lon, range}, map) => {
     // 前回登録したIDで今回登録が無い場合には地図からも削除
     console.log(`mj_ids = ${mj_ids}`);
     console.log(`cur_mj_ids = ${cur_mj_ids}`);
-
-	 mj_ids.forEach(id => {
-		if (!cur_mj_ids.includes(id)) {
-			map.removeLayer(mj[id]);
-			delete mj[id];
-			delete areas[id]; 
-		}
-	 });
+    mj_ids.forEach(id => {
+      if (!cur_mj_ids.includes(id)) {
+        map.removeLayer(mj[id]);
+        delete mj[id];
+        delete areas[id];
+      }
+    });
 
    //  last_mj_ids.forEach(last_id => {
    //    if (!cur_mj_ids.includes(last_id)) {
