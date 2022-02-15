@@ -33,7 +33,6 @@ export default {
       self_marker: null,
       clearId: {},
       regist_area_layers: {},
-      last_content: null,
       audio_url: require("../assets/2s.mp3"),
       show_dialog: true
     }
@@ -76,6 +75,7 @@ export default {
     },
     // モバイル情報板用
     is_area_in(areas) {
+      console.log(areas);
       if (this.coords.lat == "" || this.coords.lng == "") return;
 
       Object.keys(areas).forEach( async id => {
@@ -83,12 +83,13 @@ export default {
           const area_in = pointInPolygon([this.coords.lat, this.coords.lng], areas[id].coords);
           if (area_in) {
             console.log("エリアの中にいます。");
-            console.log(areas[id].content);
+            console.log(areas[id]);
 
-            if (this.last_content != areas[id].content) {
+            if (areas[id].last_content != areas[id].content && areas[id].played) {
               this.audio_url = `${areas[id].content}`;
               await this.$refs.audio_el.play();
-              this.last_content = areas[id].content;
+              areas[id].last_content = areas[id].content;
+              areas[id].played = true;
             }
           } else {
             console.log("残念。外です。");
