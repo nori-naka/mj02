@@ -50,7 +50,7 @@ const mj = {};
 const get_events = async ({lat, lon, range}, map) => {
 
   const url_event = MAIN_URL + API_EVENTS + `?lat=${lat}&lon=${lon}&range=${range}`;
-  const mj_ids = Object.keys(mj);
+  // const mj_ids = Object.keys(mj);
 
   const res_event = await fetch(url_event);
   if (res_event.ok) {
@@ -60,17 +60,18 @@ const get_events = async ({lat, lon, range}, map) => {
     // Object.keys(mj).forEach(id => {
     //   map.removeLayer(mj[id]);
     // })
-    const cur_mj_ids = [];
+    // const cur_mj_ids = [];
+    const cur_mj = {};
     json_event.forEach( async ({ payload }) => {
       if (
         payload && payload.nodeID && payload.node && payload.node.p2 && payload.locationTypeID &&
         payload.actions && payload.actions.length > 0 && payload.actions[0].action.voices
       ) {
 
-        cur_mj_ids.push(payload.nodeID);
-        console.log(`nodeID: ${payload.nodeID} in ${mj_ids}`);
+        cur_mj[payload.nodeID] = payload.uuid;
+        console.log(`nodeID: ${payload.nodeID} in ${Object.keys(mj)}`);
         // 既に登録済みの場合、抜ける
-        if (mj_ids.includes(payload.nodeID)) {
+        if (Object.keys(mj).includes(payload.nodeID) && mj[payload.nodeID].uuid == payload.uuid) {
           console.log("既に登録済み。登録しないよ")
           return;
         }
@@ -89,9 +90,10 @@ const get_events = async ({lat, lon, range}, map) => {
               return [point.latitude, point.longitude]
             });
             console.log(latlngs);
-            mj[payload.nodeID] = L.polygon(latlngs, {color: "red"})
-              .addTo(map)
-              .bindPopup(content);  
+            mj[payload.nodeID] = {
+              layer: L.polygon(latlngs, {color: "red"}).addTo(map).bindPopup(content),
+              uuid: payload.uuid
+            }
             areas[payload.nodeID] = { coords: latlngs, content: `${payload.actions[0].action.voices[0].url}` };
           }
         } else {
@@ -111,10 +113,10 @@ const get_events = async ({lat, lon, range}, map) => {
       }
     });
     // 前回登録したIDで今回登録が無い場合には地図からも削除
-    console.log(`mj_ids = ${mj_ids}`);
-    console.log(`cur_mj_ids = ${cur_mj_ids}`);
-    mj_ids.forEach(id => {
-      if (!cur_mj_ids.includes(id)) {
+    console.log(`mj = ${mj}`);
+    console.log(`cur_mj = ${cur_mj}`);
+    Object.keys(mj).forEach(id => {
+      if (!Object.keys(cur_mj).includes(id)) {
         map.removeLayer(mj[id]);
         delete mj[id];
         delete areas[id];
