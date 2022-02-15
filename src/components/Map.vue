@@ -27,7 +27,7 @@ export default {
     return {
       first_flag: true,
       map: null,
-      coords: { lat: "", lng: "", time_stamp: 0 },
+      coords: { lat: null, lng: null, time_stamp: 0 },
       last_coords: { lat: "", lng: "", time_stamp: 0 },
       profile: {},
       self_marker: null,
@@ -212,7 +212,13 @@ export default {
         position: "bottomright"
       }).addTo(this.map);
 
-      this.is_area_in(areas);
+      // モバ情の場合
+      this.clearId["get_events"] = setInterval(() => {
+        if (this.coords.lat && this.coords.lng) {
+          get_events({lat: this.coords.lat, lon: this.coords.lng, range: 300}, this.map);
+        }
+      }, 10000);
+
       this.clearId["is_area_in"] = setInterval(() => {this.is_area_in(areas)}, 1000);
 
       // this.regist_area();
@@ -262,12 +268,6 @@ export default {
           .addTo(this.map)
           // .bindPopup(popup_content);
       }
-      // モバ情の場合
-      console.log(`NOW:${this.coords.time_stamp} LAST:${this.last_coords.time_stamp}`);
-      if (this.coords.time_stamp - this.last_coords.time_stamp > 1000) {
-        await get_events({lat: this.coords.lat, lon: this.coords.lng, range: 300}, this.map);
-      }
-      this.last_coords = { ...this.coords };
     },
     geo_error(error) {
       console.log(`GEO_ERROR: ${error.message}`);
