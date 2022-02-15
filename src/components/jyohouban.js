@@ -51,7 +51,6 @@ const get_events = async ({lat, lon, range}, map) => {
 
   const url_event = MAIN_URL + API_EVENTS + `?lat=${lat}&lon=${lon}&range=${range}`;
   const mj_ids = Object.keys(mj);
-  const cur_mj_ids = [];
 
   const res_event = await fetch(url_event);
   if (res_event.ok) {
@@ -61,7 +60,7 @@ const get_events = async ({lat, lon, range}, map) => {
     // Object.keys(mj).forEach(id => {
     //   map.removeLayer(mj[id]);
     // })
-
+    const cur_mj_ids = [];
     json_event.forEach( async ({ payload }) => {
       if (
         payload && payload.nodeID && payload.node && payload.node.p2 && payload.locationTypeID &&
@@ -112,9 +111,9 @@ const get_events = async ({lat, lon, range}, map) => {
       }
     });
     // 前回登録したIDで今回登録が無い場合には地図からも削除
+    console.log(`last_mj_ids = ${last_mj_ids}`);
+    console.log(`cur_mj_ids = ${cur_mj_ids}`);
     last_mj_ids.forEach(last_id => {
-      console.log(`last_mj_ids = ${last_mj_ids}`);
-      console.log(`cur_mj_ids = ${cur_mj_ids}`);
       if (!cur_mj_ids.includes(last_id)) {
         map.removeLayer(mj[last_id]);
         delete areas[last_id];
