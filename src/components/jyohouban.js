@@ -69,7 +69,7 @@ const get_events = async ({lat, lon, range}, map) => {
         const mj_keys = Object.keys(mj);
         console.log(`nodeID: ${payload.nodeID} in ${mj_keys}`);
         // 既に登録済みの場合、抜ける
-        if (payload.nodeID in Object.keys(mj)) {
+        if (Object.keys(mj).includes(payload.nodeID)) {
           console.log("既に登録済み。登録しないよ")
           return;
         }
