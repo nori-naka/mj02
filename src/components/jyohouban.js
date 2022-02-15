@@ -40,6 +40,15 @@ const get_address = async ({ lat, lon }) => {
   return null
 }
 
+const R = Math.PI / 180;
+const distance = (latlng1, latlng2) => {
+  const lat1 = latlng1.lat * R;
+  const lng1 = latlng1.lng * R;
+  const lat2 = latlng2.lat * R;
+  const lng2 = latlng2.lng * R;
+  return 6371 * Math.acos(Math.cos(lat1) * Math.cos(lat2) * Math.cos(lng2 - lng1) + Math.sin(lat1) * Math.sin(lat2));
+}
+
 const MAIN_URL = "https://mobileinfogroupappservice.azurewebsites.net";
 const API_EVENTS = "/api/FixedEvents";
 const API_AREA = "/api/AreaPoints";
@@ -93,7 +102,6 @@ const get_events = async ({lat, lon, range}, map) => {
             mj[payload.nodeID] = {
               layer: L.polygon(latlngs, {color: "red"}).addTo(map).bindPopup(content),
               uuid: payload.uuid,
-
             }
             areas[payload.nodeID] = { coords: latlngs, content: `${payload.actions[0].action.voices[0].url}` };
           }
@@ -114,8 +122,8 @@ const get_events = async ({lat, lon, range}, map) => {
       }
     });
     // 前回登録したIDで今回登録が無い場合には地図からも削除
-    console.log(`mj = ${mj}`);
-    console.log(`cur_mj = ${cur_mj}`);
+    // console.log(`mj = ${JSON.stringify(mj)}`);
+    // console.log(`cur_mj = ${JSON.stringify(cur_mj)}`);
     Object.keys(mj).forEach(id => {
       if (!Object.keys(cur_mj).includes(id)) {
         map.removeLayer(mj[id]);
@@ -147,4 +155,4 @@ const get_events = async ({lat, lon, range}, map) => {
   // })
 }
 
-export { get_events, equalObj, get_address, areas };
+export { get_events, equalObj, get_address, distance, areas };

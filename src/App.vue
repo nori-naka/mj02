@@ -11,6 +11,12 @@ export default {
   name: 'App',
   components: {
     Map
+  },
+  data() {
+    return {
+      img_ping: require("./assets/marker2.png"),
+      img_person: require("./assets/people_marker.png")
+    }
   }
 }
 </script>

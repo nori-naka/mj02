@@ -18,8 +18,10 @@ import L from "leaflet";
 import pointInPolygon from "point-in-polygon";
 
 import { wakeupLock } from "./wakeupLock";
-import { get_events, areas } from "./jyohouban";
+import { get_events, get_address, distance, areas } from "./jyohouban";
+// import { get_events, areas } from "./jyohouban";
 import { line_init, line_sendMsg } from "./LINE";
+// import { line_sendMsg } from "./LINE";
 import hw_json from "../assets/N06-20_HighwaySection.json";
 
 export default {
@@ -27,8 +29,9 @@ export default {
     return {
       first_flag: true,
       map: null,
-      coords: { lat: null, lng: null, time_stamp: 0 },
+      coords: { lat: "", lng: "", time_stamp: 0 },
       last_coords: { lat: "", lng: "", time_stamp: 0 },
+      last_address: { ken: "", city: "", banchi: "" },
       profile: {},
       self_marker: null,
       clearId: {},
@@ -50,7 +53,7 @@ export default {
           className: "icon_style",
           iconUrl: this.profile.pictureUrl,
           iconSize: [64, 64],
-          iconAnchor: [20, 20],
+          iconAnchor: [32, 32],
           popupAnchor: [0, -20]
         }))
       }
@@ -85,7 +88,7 @@ export default {
             console.log("エリアの中にいます。");
             console.log(areas[id]);
 
-            if (areas[id].last_content != areas[id].content && !areas[id].played) {
+            if (areas[id].last_content != areas[id].content || !areas[id].played) {
               this.audio_url = `${areas[id].content}`;
               await this.$refs.audio_el.play();
               areas[id].last_content = areas[id].content;
@@ -93,7 +96,7 @@ export default {
             }
           } else {
             console.log("残念。外です。");
-            if (areas[id].played && Date.now() - areas[id].played > 30000) {
+            if (areas[id].played && (Date.now() - areas[id].played) > 30000) {
               areas[id].played = false;
             }
           }
@@ -214,7 +217,7 @@ export default {
 
       // モバ情の場合
       this.clearId["get_events"] = setInterval(() => {
-        if (this.coords.lat && this.coords.lng) {
+        if (this.coords.lat != "" && this.coords.lng != "") {
           get_events({lat: this.coords.lat, lon: this.coords.lng, range: 300}, this.map);
         }
       }, 10000);
@@ -261,13 +264,35 @@ export default {
             className: "icon_style",
             iconUrl: this.profile.pictureUrl ? this.profile.pictureUrl : require("@/assets/people_marker.png"),
             iconSize: [64, 64],
-            iconAnchor: [20, 20],
+            iconAnchor: [32, 32],
             popupAnchor: [0, -20]
           })
+          // icon: L.divIcon({
+          //   html: `<div class="ping"><img src="${this.profile.pictureUrl ? this.profile.pictureUrl : require("@/assets/people_marker.png")}" /></div>`,
+          //   iconSize: [0, 0],
+          //   iconAnchor: [32, 128],
+          //   popupAnchor: [0, -20]
+          // })
         })
           .addTo(this.map)
           // .bindPopup(popup_content);
       }
+      if (distance(this.coords, this.last_coords) > 0.01) {
+        const cur_address = await get_address({ lat: this.coords.lat, lon: this.coords.lng });
+        const popup_content = cur_address ? `<h1>現在の場所は<br>${cur_address.ken} ${cur_address.city} ${cur_address.banchi}付近です</h1>` :
+                                            `<h1>現在の場所は、<br>緯度 ${latlng.lat}<br>経度 ${latlng.lng}</h1>`;
+        const self_popup = this.self_marker.getPopup();
+        if (self_popup) {
+          self_popup.setContent(popup_content);
+        } else {
+          this.self_marker.bindPopup(popup_content);
+        }
+
+        if (cur_address && cur_address.ken != this.last_address.ken) {
+          this.last_address = { ...cur_address };
+        }
+      }
+
     },
     geo_error(error) {
       console.log(`GEO_ERROR: ${error.message}`);
@@ -287,6 +312,40 @@ export default {
   border-color: #549fa9;
   border-width: 1px;
 }
+.icon_style::after {
+  content: "";
+  position: absolute;
+  top: 95%;
+  left: 50%;
+  margin-left: -15px;
+  border: 15px solid transparent;
+  border-top: 15px solid #549fa9;
+}
+.ping {
+  position: relative;
+  display: inline-block;
+  border-radius: 50%;
+  /* background-color: #e0edff; */
+  background-color: #fa4c3f;
+}
+.ping::after {
+  content: "";
+  position: absolute;
+  top: 95%;
+  left: 50%;
+  margin-left: -15px;
+  border: 15px solid transparent;
+  /* border-top: 15px solid #e0edff; */
+  border-top: 15px solid #fa4c3f;
+}
+.ping img {
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  border-color: #549fa9;
+  border-width: 1px;
+}
+
 .map_layout {
   position: relative;
   height: 100vh;
