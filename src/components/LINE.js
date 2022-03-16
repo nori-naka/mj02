@@ -34,11 +34,13 @@ const line_init = (next) => {
 
       if (next) next(profile);
 
+      return liff.ready;
     })
     .catch(err => {
-      console.log(err.message);
+      // console.log(err.message);
+      throw(err.message);
     });
-  return liff.ready;
+  // return liff.ready;
 }
 
 const line_close = () => {

@@ -40,25 +40,31 @@ export default {
       show_dialog: true
     }
   },
-  async mounted() {
+   mounted() {
     // 眠気覚まし
     wakeupLock();
 
-    await line_init(p => {
-      this.profile = p;
-      console.log("----------PROFILE-----------")
-      console.log(this.profile);
-      if (this.self_marker && this.profile.pictureUrl) {
-        this.self_marker.setIcon(L.icon({
-          className: "icon_style",
-          iconUrl: this.profile.pictureUrl,
-          iconSize: [64, 64],
-          iconAnchor: [32, 32],
-          popupAnchor: [0, -20]
-        }))
-      }
-    });
-    this.init_map();
+    try {
+      line_init(p => {
+        this.profile = p;
+        console.log("----------PROFILE-----------")
+        console.log(this.profile);
+        if (this.self_marker && this.profile.pictureUrl) {
+          this.self_marker.setIcon(L.icon({
+            className: "icon_style",
+            iconUrl: this.profile.pictureUrl,
+            iconSize: [64, 64],
+            iconAnchor: [32, 32],
+            popupAnchor: [0, -20]
+          }))
+        }
+      }).then(() => {
+        this.init_map();
+      });
+    }catch(e) {
+      console.log(e);
+      this.init_map();
+    }
   },
 
   //   // const hw_type = {
