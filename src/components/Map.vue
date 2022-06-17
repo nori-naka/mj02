@@ -225,6 +225,10 @@ export default {
       this.map.on("click", ev => {
         console.dir(ev);
 
+        const zoomLevel = this.map.getZoom();
+        let mj_num = 0
+        console.log(`ズームレベルは${zoomLevel}`)
+
         const { mj, contents } = get_mj();
 
         let html_content = "";
@@ -237,16 +241,21 @@ export default {
           if (mj[id].getLatLng) {
             const p3 = this.map.latLngToLayerPoint(mj[id].getLatLng())
             if (b1.contains(p3)) {
-              console.log(contents[id])
+              mj_num = mj_num + 1;
               html_content = html_content + contents[id];
             }
           }
         });
         if (html_content !== "") {
-          L.popup()
-            .setLatLng(ev.latlng)
-            .setContent(html_content)
-            .openOn(this.map);
+          if (mj_num <= 2 || zoomLevel >= 15) {
+            L.popup()
+              .setLatLng(ev.latlng)
+              .setContent(html_content)
+              .openOn(this.map);
+          } else {
+            this.map
+              .setView(ev.latlng, zoomLevel + 2);
+          }
         }
       });
 
