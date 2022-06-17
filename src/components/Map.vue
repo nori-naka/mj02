@@ -18,11 +18,12 @@ import L from "leaflet";
 import pointInPolygon from "point-in-polygon";
 
 import { wakeupLock } from "./wakeupLock";
-import { get_events, get_address, distance, areas } from "./jyohouban";
+import { get_events, get_address, distance, areas, get_mj } from "./jyohouban";
 // import { get_events, areas } from "./jyohouban";
 import { line_init, line_sendMsg } from "./LINE";
 // import { line_sendMsg } from "./LINE";
 import hw_json from "../assets/N06-20_HighwaySection.json";
+const BOUNDS_SIZE = 40;
 
 export default {
   data() {
@@ -214,12 +215,40 @@ export default {
         "高速道路": hw_layer,
       }
       this.map = L.map("map", {
-        center: L.latLng( 35.6825, 139.752778), 
+        center: L.latLng( 35.6825, 139.752778),
         zoom: 15
       }).addLayer(osmLayer);
       L.control.layers(baseMap, overLayer, {
         position: "bottomright"
       }).addTo(this.map);
+
+      this.map.on("click", ev => {
+        console.dir(ev);
+
+        const { mj, contents } = get_mj();
+
+        let html_content = "";
+        const b1 = L.bounds([
+          [ ev.layerPoint.x - BOUNDS_SIZE /2, ev.layerPoint.y - BOUNDS_SIZE /2 ],
+          [ ev.layerPoint.x + BOUNDS_SIZE /2, ev.layerPoint.y + BOUNDS_SIZE /2 ]
+        ]);
+        console.dir(b1);
+        Object.keys(mj).forEach(id => {
+          if (mj[id].getLatLng) {
+            const p3 = this.map.latLngToLayerPoint(mj[id].getLatLng())
+            if (b1.contains(p3)) {
+              console.log(contents[id])
+              html_content = html_content + contents[id];
+            }
+          }
+        });
+        if (html_content !== "") {
+          L.popup()
+            .setLatLng(ev.latlng)
+            .setContent(html_content)
+            .openOn(this.map);
+        }
+      });
 
       // モバ情の場合
       this.clearId["get_events"] = setInterval(() => {

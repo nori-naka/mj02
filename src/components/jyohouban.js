@@ -29,7 +29,7 @@ const get_address = async ({ lat, lon }) => {
     if (address_data && address_data.results) {
       const banchi = address_data.results.lv01Nm;
       const muniCd = address_data.results.muniCd;
-      const [, ken_name, , city_name] = GSI.MUNI_ARRAY[muniCd].split(",");  
+      const [, ken_name, , city_name] = GSI.MUNI_ARRAY[muniCd].split(",");
       return {
         ken: ken_name,
         city: city_name,
@@ -54,8 +54,10 @@ const API_EVENTS = "/api/FixedEvents";
 const API_AREA = "/api/AreaPoints";
 const areas = {};
 const mj = {};
+const contents = {};
 // let last_mj_ids = [];
 
+const get_mj = () => { return { mj, contents } };
 const get_events = async ({lat, lon, range}, map) => {
 
   const url_event = MAIN_URL + API_EVENTS + `?lat=${lat}&lon=${lon}&range=${range}`;
@@ -90,7 +92,7 @@ const get_events = async ({lat, lon, range}, map) => {
 
         // エリアの場合
         if (payload.locationTypeID == 2) {
-          // area_ids.push(payload.nodeID); 
+          // area_ids.push(payload.nodeID);
           const url_area = MAIN_URL + API_AREA + `?id=${payload.nodeID}`;
           const res_area = await fetch(url_area);
           if (res_area.ok) {
@@ -108,7 +110,7 @@ const get_events = async ({lat, lon, range}, map) => {
         } else {
         // 地点通過の場合
           const latlng = L.latLng({lat: payload.node.p2.latitude, lng: payload.node.p2.longitude});
-          mj[payload.nodeId] = L.marker(latlng, {
+          mj[payload.nodeID] = L.marker(latlng, {
             icon: L.icon({
               iconUrl: require("@/assets/Icon-76.png"),
               iconSize: [40, 40],
@@ -117,7 +119,8 @@ const get_events = async ({lat, lon, range}, map) => {
             })
           })
             .addTo(map)
-            .bindPopup(content);  
+            // .bindPopup(content);
+          contents[payload.nodeID] = content;
         }
       }
     });
@@ -155,4 +158,4 @@ const get_events = async ({lat, lon, range}, map) => {
   // })
 }
 
-export { get_events, equalObj, get_address, distance, areas };
+export { get_events, equalObj, get_address, distance, areas, get_mj };
